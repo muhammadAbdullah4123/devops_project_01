@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: .
+    ports:
+      - 8080:80
+    volumes:
+      - ./tmp:/tmp
+    networks:
+      - mynet
+    environment:
+      - NAME= "Alpha"
+    restart: always
+
+networks:
+  mynet:
+    driver: bridge
