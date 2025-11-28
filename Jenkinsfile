@@ -22,7 +22,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo "Running SonarQube scan..."
-                withSonarQubeEnv('SonarQubeServer') {
+                withSonarQubeEnv('sonarqube') {
                     withCredentials([string(credentialsId: 'sonar_token', variable: 'SONAR_TOKEN')]) {
                         sh "mvn sonar:sonar \
                             -Dsonar.projectKey=project_01 \
