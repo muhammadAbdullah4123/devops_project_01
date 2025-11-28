@@ -1,53 +1,54 @@
-
 pipeline {
-    agent {label: ubuntu}
+    agent any
 
     environment {
-        // SonarQube configuration
         SONAR_HOST_URL = 'http://18.214.15.157:9000'
-        SONAR_SCANNER = 'SonarQubeScanner' // Jenkins configured SonarQube scanner tool
     }
     
     stages {
-        stage("User"){
-            steps{
+        stage("User") {
+            steps {
                 sh "whoami"
-                sh "docker compose down"
-            }
-        }
-        stage("Clone code"){
-            steps{
-                git url: "https://github.com/muhammadAbdullah4123/devops_project_01.git" , branch: "main"
+                sh "docker compose down || true" // don't fail if nothing to stop
             }
         }
 
-        tage('SonarQube Analysis') {
+        stage("Clone code") {
+            steps {
+                git url: "https://github.com/muhammadAbdullah4123/devops_project_01.git", branch: "main"
+            }
+        }
+
+        stage('SonarQube Analysis') {
             steps {
                 echo "Running SonarQube scan..."
-                withSonarQubeEnv('SonarQubeServer') { // 'SonarQubeServer' is the name configured in Jenkins
-                    sh "mvn sonar:sonar \
-                        -Dsonar.projectKey=project_01 \
-                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                        -Dsonar.login=${sqa_0ebb15611f224cbe5e0e21e37d2a56bf90ab9eda}"
+                withSonarQubeEnv('SonarQubeServer') {
+                    withCredentials([string(credentialsId: 'sonar_token', variable: 'SONAR_TOKEN')]) {
+                        sh "mvn sonar:sonar \
+                            -Dsonar.projectKey=project_01 \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.login=${SONAR_TOKEN}"
+                    }
                 }
             }
-            
-        stage("Build image"){
-            steps{
+        }
+
+        stage("Build image") {
+            steps {
                 sh "docker build -f Dockerfile --pull -t myimg:latest ."
             }
         }
-       
-        stage("Deploy image"){
-            steps{
+
+        stage("Deploy image") {
+            steps {
                 sh "docker compose up -d --build"
             }
         }
-        stage("Exit"){
-            steps{
-                echo "Every stages executed successfully......"
+
+        stage("Exit") {
+            steps {
+                echo "Every stage executed successfully..."
             }
         }
     }
-    
 }
