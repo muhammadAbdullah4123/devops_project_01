@@ -24,9 +24,12 @@ pipeline {
                 echo "Running SonarQube scan..."
                 withSonarQubeEnv('sonarqube') {
                     withCredentials([string(credentialsId: 'sonar_token', variable: 'SONAR_TOKEN')]) {
+                             sh '''
+                            mvn sonar:sonar \
                             -Dsonar.projectKey=project_01 \
-                            -Dsonar.host.url=${SONAR_HOST_URL} \
-                            -Dsonar.login=${SONAR_TOKEN}"
+                            -Dsonar.host.url=$SONAR_HOST_URL \
+                            -Dsonar.login=$SONAR_TOKEN
+                        '''
                     }
                 }
             }
